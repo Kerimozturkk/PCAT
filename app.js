@@ -1,20 +1,27 @@
 const express = require('express');
+const path = require('path');
 
 const app = express();
 
+const myLogger = (req, res, next) => {
+  console.log('Middleware Log 1');
+  next(); // next demessek ilerlemez middleware func ending
+};
 
-app.get('/',(req,res) => {
+const myLogger2 = (req, res, next) => {
+  console.log('Middleware Log 2');
+  next(); // next demessek ilerlemez middleware func ending
+};
 
-    const photo = {
-        id:1,
-        name:"Photo Name",
-        description: "Photo description"
-    }
+//MIDDLEWARES
+app.use(express.static('public')); // express static gömülü bir middleware fonksiyonudur.
+//static dosyalar için public klasçrü
+app.use(myLogger);
+app.use(myLogger2);
 
-    res.send(photo);
-})
-
-
+app.get('/', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'temp/index.html'));
+});
 
 const port = 3000;
 
