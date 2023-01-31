@@ -1,26 +1,25 @@
 const express = require('express');
 const path = require('path');
-
+const ejs = require('ejs');
 const app = express();
 
-const myLogger = (req, res, next) => {
-  console.log('Middleware Log 1');
-  next(); // next demessek ilerlemez middleware func ending
-};
-
-const myLogger2 = (req, res, next) => {
-  console.log('Middleware Log 2');
-  next(); // next demessek ilerlemez middleware func ending
-};
+// TEMPLATE ENGINE
+app.set('view engine', 'ejs');
 
 //MIDDLEWARES
-app.use(express.static('public')); // express static gömülü bir middleware fonksiyonudur.
-//static dosyalar için public klasçrü
-app.use(myLogger);
-app.use(myLogger2);
+app.use(express.static('public'));
 
+// ROUTES
 app.get('/', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'temp/index.html'));
+  res.render('index');
+});
+
+app.get('/about', (req, res) => {
+  res.render('about');
+});
+
+app.get('/add', (req, res) => {
+  res.render('add');
 });
 
 const port = 3000;
