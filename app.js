@@ -1,11 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const fileUpload = require('express-fileupload');
+var methodOverride = require('method-override');
 
 const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
 const Photo = require('./models/Photo');
+const { updateOne } = require('./models/Photo');
 
 const app = express();
 
@@ -24,7 +26,8 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(fileUpload());
- 
+app.use(methodOverride('_method'));
+
 // ROUTES
 app.get('/', async (req, res) => {
   const photos = await Photo.find({}).sort('-dateCreated');
@@ -52,32 +55,39 @@ app.get('/add', (req, res) => {
 });
 
 app.post('/photos', async (req, res) => {
-  // console.log(req.files.image);
-
-  // await Photo.create(req.body);
-  // res.redirect('/');
-
+  
   const uploadDir = 'public/uploads';
 
   if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir); // Asenkron değil önce klasör oluşturulucak
+    fs.mkdirSync(uploadDir);
   }
 
-  let uploadedImage = req.files.image; // Burda img'a ait bilgiler alıyoruz. forma birşeyler eklenmesi gerekli
+  let uploadedImage = req.files.image;
 
   let uploadPath = __dirname + '/public/uploads/' + uploadedImage.name;
-  // yüklenen img'ler için server kök dizininde bir dosya oluşturuyoruz.
-  // Bu dosya üzerinden img'ler gösterilecek dosya oluşturduk path'i yakalamak için
-  // img'i da ekliyoruz.
 
-  //img'yi istenilen klasöre move et
   uploadedImage.mv(uploadPath, async () => {
     await Photo.create({
       ...req.body,
-      image: '/uploads/' + uploadedImage.name, // görselin yolunu yani path'ini db'ye attık
+      image: '/uploads/' + uploadedImage.name,
     });
     res.redirect('/');
   });
+});
+
+app.get('/photos/edit/:id', async (req, res) => {
+  const photo = await Photo.findOne({ _id: req.params.id });
+  res.render('edit', {
+    photo,
+  });
+});
+
+app.put('/photos/:id', async (req, res) => {
+  const photo = await Photo.findOne({ _id: req.params.id });
+  photo.title = req.body.title;
+  photo.description = req.body.description;
+  photo.save();
+  res.redirect(`/photos/${req.params.id}`);
 });
 
 const port = 3000;
