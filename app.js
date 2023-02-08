@@ -45,7 +45,7 @@ app.get('/photos/edit/:id', pageController.getEditPage);
 
 
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
   console.log(`Server port ${port} de başlatıldı...`);
